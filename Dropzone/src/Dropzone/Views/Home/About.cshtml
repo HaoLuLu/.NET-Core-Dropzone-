@@ -1,0 +1,75 @@
+﻿@{
+    ViewData["Title"] = "About";
+}
+<h2>@ViewData["Title"].</h2>
+<h3>@ViewData["Message"]</h3>
+
+@*//_Layout.cshtml 中引入相关文件（三个）  *@
+
+
+<form id="my-awesome-dropzone" class="dropzone" enctype="multipart/form-data" action="UploadFiles">
+    <div class="dropzone-previews"></div>
+</form>
+<div>
+    <div class="m text-left" id="upload"><small><font style="color:red">图片文件个数不得超过5个。</font></small> </div>
+    <input id="uploadFile" type="button" value="上传" />
+</div>
+<script type="text/javascript">
+    Dropzone.options.myAwesomeDropzone = {
+        url: "@Url.Action("BatchUpload", "Home")",
+        autoProcessQueue: false,
+        uploadMultiple: true,
+        paramName: "file",
+        maxFiles: 5,
+        addRemoveLinks: true,
+        parallelUploads: 5,
+        dictRemoveFile: "删除文件",
+        dictDefaultMessage: "<center>单击或拖拽图片至此灰色区域</center>",
+        dictMaxFilesExceeded: "您不能在上传更多的图片了.",
+        acceptedFiles: ".jpg,.png,.jpeg,.gif,.bmp,.xlsx,.xls,.docx,.doc",
+
+        init: function () {
+            var myDropzone = this;
+            $(function () {
+                $('#uploadModal').on('hidden.bs.modal', function () {
+                    myDropzone.removeAllFiles(true);
+                })
+            });
+            this.on("maxfilesexceeded", function (files) {
+                bootbox.alert("已超过最大图片数量限制！");
+                myDropzone.removeFile(files);
+            });
+            myDropzone.on("sending", function (file, xhr, formData) {
+                formData.append("id", $('#orderUploadId').val());
+            });
+            this.on("success", function (file, message) {
+                if (0 == message.code) {
+                    swal(message.message, "", "error");
+                    var modal = $('#uploadModal').modal('hide');
+                } else {
+                    swal("上传成功", "", "success");
+                    myDropzone.removeAllFiles(true);
+                    var modal = $('#uploadModal').modal('hide');
+                }
+                resetUploadTip();
+            });
+            $("#uploadFile").click(function () {
+                if (myDropzone.files.length == 0) {
+                    alert("文件不能为空");
+                } else {
+                    myDropzone.processQueue();
+                }
+
+            });
+            
+            //this.element.parentNode.parentNode.nextElementSibling.querySelector("button[type=button]").addEventListener("click", function(e) {
+            //    myDropzone.removeAllFiles(true);
+            //    resetUploadTip();
+            //});
+            //this.element.parentNode.parentNode.parentNode.childNodes[1].childNodes[1].addEventListener("click", function(e) {
+            //  myDropzone.removeAllFiles(true);
+            //  resetUploadTip();
+            //});
+        }
+    }
+</script>
